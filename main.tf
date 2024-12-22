@@ -193,37 +193,37 @@ resource "aws_instance" "terraform_front_ec2" {
   security_groups = [aws_security_group.terraform_front_ec2_sg.id] 
  
 
-   provisioner "remote-exec" {
-    inline = [
-      # # Create the file and set the permissions
-      # "echo '${file(var.key_path)}' > /home/ubuntu/TF_key.pem",
-      # "chmod 400 /home/ubuntu/TF_key.pem" ,
+  #  provisioner "remote-exec" {
+  #   inline = [
+  #     # # Create the file and set the permissions
+  #     # "echo '${file(var.key_path)}' > /home/ubuntu/TF_key.pem",
+  #     # "chmod 400 /home/ubuntu/TF_key.pem" ,
       
-      # Replace server_name with _default
-        "sudo sed -i 's|server_name .*|server_name ${aws_lb.alb_front.dns_name};|' /etc/nginx/sites-available/fundoo.conf",
-       "sudo sed -i 's|proxy_pass .*|proxy_pass http://${aws_lb.alb_back.dns_name}:8000;|' /etc/nginx/sites-available/fundoo.conf",
+  #     # Replace server_name with _default
+  #       "sudo sed -i 's|server_name .*|server_name ${aws_lb.alb_front.dns_name};|' /etc/nginx/sites-available/fundoo.conf",
+  #      "sudo sed -i 's|proxy_pass .*|proxy_pass http://${aws_lb.alb_back.dns_name}:8000;|' /etc/nginx/sites-available/fundoo.conf",
 
-      # Restart or reload Nginx to apply the changes
-      # Reload or restart Nginx to apply the changes
-       "sudo systemctl daemon-reload",
-       "sudo systemctl reload nginx"
+  #     # Restart or reload Nginx to apply the changes
+  #     # Reload or restart Nginx to apply the changes
+  #      "sudo systemctl daemon-reload",
+  #      "sudo systemctl reload nginx"
     
-    ]
+  #   ]
 
-    connection {
-      type        = "ssh"
-      user        = "ubuntu"
-      private_key = file(var.key_path) # Path to private key for SSH connection
-      host        = aws_instance.terraform_front_ec2.public_ip  # Public IP of the EC2 instance
-      port        = var.port_22
-      timeout     = "2m"
-    }
+  #   connection {
+  #     type        = "ssh"
+  #     user        = "ubuntu"
+  #     private_key = file(var.key_path) # Path to private key for SSH connection
+  #     host        = aws_instance.terraform_front_ec2.public_ip  # Public IP of the EC2 instance
+  #     port        = var.port_22
+  #     timeout     = "2m"
+  #   }
      
-  }
+  # }
   tags = {
     Name = var.ws-front-ec2-name
   }
-  depends_on = [ aws_lb.alb_front,aws_lb.alb_back ]
+ # depends_on = [ aws_lb.alb_front,aws_lb.alb_back ]
 }
 
 
@@ -351,40 +351,40 @@ tags = {
     Name = var.ws-data-ec2-name
   }
 }
-resource "null_resource" "database_setup" {
-  triggers = {
-    instance_id=aws_instance.terraform_data_ec2.id
-  }
+# resource "null_resource" "database_setup" {
+#   triggers = {
+#     instance_id=aws_instance.terraform_data_ec2.id
+#   }
 
-   provisioner "remote-exec" {
-    inline = [
-      "sudo apt update -y",
-      "sudo apt install -y postgresql postgresql-contrib",
-      "sudo systemctl enable postgresql",
-      "sudo systemctl start postgresql",
-      "sudo -u postgres psql -c \"CREATE USER fundoo WITH PASSWORD 'root';\"",
-      "sudo -u postgres psql -c \"CREATE DATABASE fundoodb OWNER fundoo;\"",
-      "sudo sed -i \"s/#listen_addresses = 'localhost'/listen_addresses = '*'/g\" /etc/postgresql/16/main/postgresql.conf",
-      "sudo bash -c 'echo \"host  all all 0.0.0.0/0 md5\" >> /etc/postgresql/*/main/pg_hba.conf'",
-      "sudo systemctl restart postgresql"
-    ]
+#    provisioner "remote-exec" {
+#     inline = [
+#       "sudo apt update -y",
+#       "sudo apt install -y postgresql postgresql-contrib",
+#       "sudo systemctl enable postgresql",
+#       "sudo systemctl start postgresql",
+#       "sudo -u postgres psql -c \"CREATE USER fundoo WITH PASSWORD 'root';\"",
+#       "sudo -u postgres psql -c \"CREATE DATABASE fundoodb OWNER fundoo;\"",
+#       "sudo sed -i \"s/#listen_addresses = 'localhost'/listen_addresses = '*'/g\" /etc/postgresql/16/main/postgresql.conf",
+#       "sudo bash -c 'echo \"host  all all 0.0.0.0/0 md5\" >> /etc/postgresql/*/main/pg_hba.conf'",
+#       "sudo systemctl restart postgresql"
+#     ]
 
-    connection {
-      type        = "ssh"
-      user        = "ubuntu"
-      private_key = file(var.key_path)
-      host        = aws_instance.terraform_data_ec2.private_ip  
-      port        = var.port_22
-      timeout     = "10m"
-      bastion_host = aws_instance.terraform_front_ec2.public_ip
-      bastion_private_key = file(var.key_path)
+#     connection {
+#       type        = "ssh"
+#       user        = "ubuntu"
+#       private_key = file(var.key_path)
+#       host        = aws_instance.terraform_data_ec2.private_ip  
+#       port        = var.port_22
+#       timeout     = "10m"
+#       bastion_host = aws_instance.terraform_front_ec2.public_ip
+#       bastion_private_key = file(var.key_path)
      
-    }
-  }
-   depends_on = [aws_instance.terraform_data_ec2]
+#     }
+#   }
+#    depends_on = [aws_instance.terraform_data_ec2]
 
   
-}
+# }
 
 #create ec2
 resource "aws_instance" "terraform_back_ec2" {
@@ -401,42 +401,42 @@ resource "aws_instance" "terraform_back_ec2" {
   }
 }
 
-resource "null_resource"  "backend_setup" {
-  triggers = {
-    instance_id = aws_instance.terraform_back_ec2.id
-  }
-  provisioner "remote-exec" {
-    inline = [
-      # Create the file and set the permissions
-      "echo '${file(var.key_path)}' > /home/ubuntu/TF_key.pem",
-      "chmod 400 /home/ubuntu/TF_key.pem" ,
-      "echo 'Updating DATABASE_HOST IN env.confg'",
+# resource "null_resource"  "backend_setup" {
+#   triggers = {
+#     instance_id = aws_instance.terraform_back_ec2.id
+#   }
+#   provisioner "remote-exec" {
+#     inline = [
+#       # Create the file and set the permissions
+#       "echo '${file(var.key_path)}' > /home/ubuntu/TF_key.pem",
+#       "chmod 400 /home/ubuntu/TF_key.pem" ,
+#       "echo 'Updating DATABASE_HOST IN env.confg'",
 
-      "sudo sed -i 's/DATABASE_HOST=.*/DATABASE_HOST=${aws_instance.terraform_data_ec2.private_ip}/' /etc/env.confg",
-      "sudo systemctl daemon-reload",
-      "echo 'Update completed'",
-      "echo 'migrating'",
-      "sudo su ram bash -c 'cd /home/ram && source myenv/bin/activate && cd /FUNDOO-NOTES/fundoo_notes && python3 manage.py makemigrations && python3 manage.py migrate'",
-      "sudo systemctl restart gunicorn.service" ,
+#       "sudo sed -i 's/DATABASE_HOST=.*/DATABASE_HOST=${aws_instance.terraform_data_ec2.private_ip}/' /etc/env.confg",
+#       "sudo systemctl daemon-reload",
+#       "echo 'Update completed'",
+#       "echo 'migrating'",
+#       "sudo su ram bash -c 'cd /home/ram && source myenv/bin/activate && cd /FUNDOO-NOTES/fundoo_notes && python3 manage.py makemigrations && python3 manage.py migrate'",
+#       "sudo systemctl restart gunicorn.service" ,
 
-    ]
+#     ]
 
-    connection {
-      type        = "ssh"
-      user        = "ubuntu"
-      private_key = file(var.key_path)# Path to private key for SSH connection
-      host        = aws_instance.terraform_back_ec2.private_ip  # Public IP of the EC2 instance
-      bastion_host = aws_instance.terraform_front_ec2.public_ip
-      bastion_private_key =file(var.key_path)
-      port        = var.port_22
-      timeout     = "10m"
-    }
-  }
-   depends_on = [ aws_instance.terraform_back_ec2 ,
-                  null_resource.database_setup]
+#     connection {
+#       type        = "ssh"
+#       user        = "ubuntu"
+#       private_key = file(var.key_path)# Path to private key for SSH connection
+#       host        = aws_instance.terraform_back_ec2.private_ip  # Public IP of the EC2 instance
+#       bastion_host = aws_instance.terraform_front_ec2.public_ip
+#       bastion_private_key =file(var.key_path)
+#       port        = var.port_22
+#       timeout     = "10m"
+#     }
+#   }
+#    depends_on = [ aws_instance.terraform_back_ec2 ,
+#                   null_resource.database_setup]
   
  
-}
+# }
 
 
 

@@ -1,10 +1,10 @@
 terraform { 
   backend remote { 
     
-    organization = "terraform-cloud-git" 
+    organization = "infra-git" 
 
     workspaces { 
-      name = "terraform-cloud-git" 
+      name = "infra-cloud-git" 
     } 
   } 
 }
